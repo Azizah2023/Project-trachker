@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAFCSP — تقرير المشاريع</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,Arial,sans-serif;background:#F5F5F3;color:#2C2C2A}
+.page{max-width:1100px;margin:0 auto;padding:20px 16px}
+.hdr{background:#0F7173;color:#fff;border-radius:12px;padding:20px 24px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.hdr-l .org{font-size:11px;opacity:.7;margin-bottom:3px}
+.hdr-l .ttl{font-size:20px;font-weight:700}
+.hdr-l .sub{font-size:12px;opacity:.8;margin-top:3px}
+.hdr-r{text-align:right;font-size:12px}
+.pills{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;display:flex;align-items:center;gap:4px}
+.pg{background:#E1F5EE;color:#085041}.pa{background:#FAEEDA;color:#633806}
+.pr{background:#FCEBEB;color:#791F1F}.pb{background:#E6F1FB;color:#0C447C}
+.dot{width:6px;height:6px;border-radius:50%}
+.live{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border-radius:20px;padding:3px 10px;font-size:11px;margin-top:6px}
+.ldot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.kpi{background:#fff;border-radius:10px;padding:14px 16px;border:1px solid #E8E7E1}
+.kpi-n{font-size:26px;font-weight:700;color:#0F7173;margin-bottom:3px}
+.kpi-l{font-size:11px;color:#888780}
+.grid{display:grid;grid-template-columns:1.2fr 0.8fr;gap:12px;margin-bottom:12px}
+.card{background:#fff;border-radius:12px;border:1px solid #E8E7E1;padding:14px 18px}
+.ct{font-size:13px;font-weight:700;color:#5F5E5A;margin-bottom:12px}
+.pj{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #F0EFE9}
+.pj:last-child{border:none;padding-bottom:0}.pj:first-child{padding-top:0}
+.sd{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.pi{flex:1;min-width:0}
+.pn{font-size:13px;font-weight:700}
+.ps{font-size:11px;color:#888;margin-top:1px}
+.br{display:flex;align-items:center;gap:8px;margin-top:5px}
+.bb{height:5px;border-radius:3px;background:#F0EFE9;flex:1}
+.bf{height:5px;border-radius:3px}
+.bp{font-size:11px;font-weight:700;min-width:28px;text-align:left}
+.upd{font-size:11px;color:#5F5E5A;margin-top:4px;background:#F5F5F3;border-radius:6px;padding:4px 8px}
+.fb{font-size:11px;color:#0F7173;margin-top:3px;background:#E6F7F7;border-radius:6px;padding:4px 8px;font-weight:500}
+.rc{display:flex;flex-direction:column;gap:12px}
+.dw{display:flex;flex-direction:column;align-items:center;gap:12px}
+.dleg{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;width:100%}
+.dl{display:flex;align-items:center;gap:6px;font-size:11px;color:#5F5E5A}
+.ds{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.rl{display:flex;flex-direction:column;gap:6px}
+.ri{display:flex;gap:8px;padding:8px;border-radius:8px;border:1px solid #E8E7E1;align-items:flex-start}
+.rv{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700;flex-shrink:0;white-space:nowrap}
+.rh{background:#FCEBEB;color:#791F1F}.rm{background:#FAEEDA;color:#633806}.rlo{background:#E1F5EE;color:#085041}
+.rn{font-size:12px;font-weight:600}.rd{font-size:11px;color:#888;margin-top:1px}
+.ftr{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #E8E7E1;font-size:11px;color:#B4B2A9;flex-wrap:wrap;gap:8px}
+.btn{background:#0F7173;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn:hover{background:#0a5254}
+.msg{text-align:center;padding:20px;color:#888;font-size:13px}
+.err{background:#FCEBEB;color:#791F1F;padding:10px;border-radius:8px;font-size:12px;line-height:1.6}
+@media(max-width:680px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.hdr{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="org">Shared Services — SAFCSP</div>
+    <div class="ttl">تقرير متابعة المشاريع</div>
+    <div class="sub">Shared Services Project Status Report</div>
+    <div class="pills" id="pills"><span style="font-size:11px;opacity:.6">Loading...</span></div>
+  </div>
+  <div class="hdr-r">
+    <div style="font-weight:600;font-size:13px" id="rdate"></div>
+    <div style="opacity:.7;margin-top:2px" id="quarter"></div>
+    <div class="live"><span class="ldot"></span>Live — updated </div>
+    <div style="opacity:.7;font-size:11px;margin-top:5px">عزيزة الشهري </div>
+  </div>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="kpi-n" id="k1">—</div><div class="kpi-l">Total Projects</div></div>
+  <div class="kpi"><div class="kpi-n" id="k2">—</div><div class="kpi-l">Avg. Completion</div></div>
+  <div class="kpi"><div class="kpi-n" id="k3">—</div><div class="kpi-l">On Track</div></div>
+  <div class="kpi"><div class="kpi-n" id="k4">—</div><div class="kpi-l">Need Attention</div></div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="ct">✅ Project Status & Feedback</div>
+    <div id="plist"><div class="msg">⏳ Loading...</div></div>
+  </div>
+  <div class="rc">
+    <div class="card">
+      <div class="ct"> Distribution</div>
+      <div class="dw">
+        <div style="position:relative;width:130px;height:130px"><canvas id="donut"></canvas></div>
+        <div class="dleg" id="dleg"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">🛡️ Risk Register</div>
+      <div class="rl" id="rlist"><div class="msg" style="padding:8px">Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="ftr">
+  <span id="lupd">—</span>
+  <button class="btn" onclick="load()">🔄 Refresh</button>
+</div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbw0wHrFncZ76iKwr_Dr9k8RToLKBQkuv4prs06tD9JTJNeWo7YTbCRhT3rDhAD0ADQ4/exec';
+
+const COLORS = {'في المسار':'#1D9E75','تحت المراجعة':'#BA7517','متأخر':'#E24B4A','تخطيط':'#378ADD'};
+const LABELS = {'في المسار':'On Track','تحت المراجعة':'At Risk','متأخر':'Delayed','تخطيط':'Planning'};
+const PILL   = {'On Track':'pg','At Risk':'pa','Delayed':'pr','Planning':'pb'};
+const DCOLS  = {'On Track':'#1D9E75','At Risk':'#BA7517','Delayed':'#E24B4A','Planning':'#378ADD'};
+const RCLS   = {'High':'rh','Medium':'rm','Low':'rlo'};
+
+let chart = null;
+
+
+const now = new Date();
+const q = Math.ceil((now.getMonth()+1)/3);
+document.getElementById('quarter').textContent = `Q${q} — ${now.getFullYear()}`;
+
+function doGet() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  var data = sheet.getDataRange().getValues();
+  var richData = sheet.getDataRange().getRichTextValues();
+  var headers = data[0];
+  var rows = [];
+
+  for(var i=1; i<data.length; i++){
+    var firstCell = String(data[i][0]);
+    if(!firstCell || firstCell.includes('متوسط') ||
+       firstCell.includes('🟡') || firstCell.includes('قيم')) continue;
+
+    var obj = {};
+    headers.forEach(function(h,j){
+      obj[h] = data[i][j];
+      // سحب الرابط لو موجود
+      var rich = richData[i][j];
+      if(rich){
+        var runs = rich.getRuns();
+        for(var r=0; r<runs.length; r++){
+          var link = runs[r].getLinkUrl();
+          if(link){ obj[h+'_url'] = link; break; }
+        }
+      }
+    });
+    rows.push(obj);
+  }
+
+  var out = ContentService.createTextOutput(JSON.stringify(rows));
+  out.setMimeType(ContentService.MimeType.JSON);
+  return out;
+}
+
+async function load(){
+  document.getElementById('plist').innerHTML='<div class="msg">⏳ Loading...</div>';
+  document.getElementById('rlist').innerHTML='<div class="msg" style="padding:8px">Loading...</div>';
+  try{
+    const res = await fetch(API);
+    const rows = await res.json();
+    if(!rows.length) throw new Error('No data');
+    render(rows);
+  }catch(e){
+    document.getElementById('plist').innerHTML=
+      `<div class="err">⚠️ Error: ${e.message}</div>`;
+  }
+}
+
+function render(rows){
+  const keys = Object.keys(rows[0]);
+  const f = (...o) => keys.find(k=>o.some(x=>String(k).includes(x)))||keys[0];
+
+  const N  = f('اسم المشروع','المشروع');
+  const D  = f('القسم');
+  const S  = f('الحالة');
+  const P  = f('نسبة');
+  const U  = f('تحديث');
+  const FB = f('الفيدباك','فيدباك');
+  const R  = f('المخاطرة','مخاطرة');
+  const L  = f('مستوى');
+
+  const pl = document.getElementById('plist');
+  pl.innerHTML='';
+  const sc={};
+  let tot=0, onT=0, atR=0;
+
+  rows.forEach(row=>{
+    const name = String(row[N]||'—');
+    const dept = String(row[D]||'');
+    const stat = String(row[S]||'');
+    const pct  = parseInt(row[P])||0;
+    const upd  = String(row[U]||'');
+    const fb   = String(row[FB]||'');
+    const risk = String(row[R]||'');
+    const lv   = String(row[L]||'');
+    const col  = COLORS[stat]||'#888';
+    const lbl  = LABELS[stat]||stat;
+
+    tot+=pct;
+    sc[lbl]=(sc[lbl]||0)+1;
+    if(lbl==='On Track') onT++;
+    if(['At Risk','Delayed'].includes(lbl)) atR++;
+
+    pl.innerHTML+=`<div class="pj">
+      <div class="sd" style="background:${col}"></div>
+      <div class="pi">
+        <div class="pn">${name}</div>
+        <div class="ps">${dept}</div>
+        <div class="br">
+          <div class="bb"><div class="bf" style="width:${pct}%;background:${col}"></div></div>
+          <span class="bp" style="color:${col}">${pct}%</span>
+          <span style="font-size:10px;color:${col};font-weight:600">${lbl}</span>
+        </div>
+        ${upd&&upd!='undefined'?`<div class="upd">🕐 ${upd}</div>`:''}
+        ${fb&&fb!='undefined'?`<div class="fb">💬 ${fb}</div>`:''}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('k1').textContent=rows.length;
+  document.getElementById('k2').textContent=Math.round(tot/rows.length)+'%';
+  document.getElementById('k3').textContent=onT;
+  document.getElementById('k4').textContent=atR;
+
+  const labs=Object.keys(sc), vals=Object.values(sc);
+  const clrs=labs.map(l=>DCOLS[l]||'#888');
+
+  document.getElementById('pills').innerHTML=labs.map((l,i)=>
+    `<span class="pill ${PILL[l]||'pg'}"><span class="dot" style="background:${clrs[i]}"></span>${l} ${vals[i]}</span>`
+  ).join('');
+
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById('donut'),{
+    type:'doughnut',
+    data:{labels:labs,datasets:[{data:vals,backgroundColor:clrs,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'70%'}
+  });
+  document.getElementById('dleg').innerHTML=labs.map((l,i)=>
+    `<div class="dl"><span class="ds" style="background:${clrs[i]}"></span>${l} — ${vals[i]}</div>`
+  ).join('');
+
+  const risks=rows.filter(r=>String(r[R]||'')&&String(r[R])!=='لا مخاطر'&&String(r[R])!=='—'&&String(r[R]).trim()!=='');
+  const rl=document.getElementById('rlist');
+  rl.innerHTML=risks.length?risks.map(r=>`<div class="ri">
+    <span class="rv ${RCLS[String(r[L])]||'rlo'}">${r[L]||'Low'}</span>
+    <div><div class="rn">${r[R]||''}</div><div class="rd">${r[N]||''}</div></div>
+  </div>`).join(''):'<div style="font-size:11px;color:#B4B2A9;padding:6px">لا توجد مخاطر</div>';
+
+  document.getElementById('lupd').textContent='Last updated: '+new Date().toLocaleTimeString('en-US');
+}
+
+document.getElementById('rdate').textContent=
+  new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+load();
+setInterval(load,5*60*1000);
+</script>
+</body>
+</html>
